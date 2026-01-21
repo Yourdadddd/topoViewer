@@ -203,8 +203,9 @@ body {
 }
 
 #viewport-buttons {
-  top: 75px;
-  left: 40px;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   position: fixed;
   z-index: 9;
 }
@@ -543,6 +544,9 @@ body {
   #viewport-buttons {
     background-color: rgba(40, 40, 40, 1);
     box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.4);
+    bottom: 20px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
   }
 
   /* sidebar to be removed */

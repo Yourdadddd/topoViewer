@@ -1,0 +1,106 @@
+# TopoViewer - Agent Guide
+
+## What is TopoViewer?
+Network topology visualization tool for Container Lab. Go backend + Cytoscape.js frontend. Provides web UI with interactive graph, SSH terminals to containers, and packet capture.
+
+## Project Structure
+```
+go_cloudshellwrapper/     # Main backend - CLI, HTTP server, API handlers
+  cmd/main.go             # Entry point
+  cmdClab.go              # Container Lab command & routes
+go_topoengine/            # Topology parsing (YAML/JSON → Cytoscape model)
+go_xtermjs/               # WebSocket terminal emulation
+go_tools/                 # Utilities (logging, SSH, SCP)
+html-static/              # Frontend JS/CSS assets
+html-template/clab/       # HTML templates (dev.html.tmpl, index.html.tmpl)
+dist/                     # Built artifacts (binary + assets)
+```
+
+## Two Installations
+| Path | Purpose |
+|------|---------|
+| `/opt/topoviewer-dev/` | Development source code |
+| `/opt/topoviewer/` | Production deployment (copy of dist/) |
+
+## Build & Deploy Workflow
+
+### Quick Deploy (no rebuild needed for template/frontend changes):
+```bash
+# Copy changed files to production
+sudo cp /opt/topoviewer-dev/html-template/clab/*.tmpl /opt/topoviewer/html-template/clab/
+sudo cp -r /opt/topoviewer-dev/html-static/* /opt/topoviewer/html-static/
+
+# Restart service
+sudo pkill -f "topoviewer clab"
+cd /opt/topoviewer && sudo ./topoviewer clab \
+  --topology-file-yaml /opt/containerlab/simple-demo/simple-demo.clab.yml \
+  --server-port 8080 \
+  --deployment-type colocated \
+  --clab-user linzhu \
+  --allowed-hostnames localhost,127.0.0.1,34.42.33.0,clab1-topo.netpilot.io \
+  --clab-server-address 34.42.33.0 &
+```
+
+### Full Rebuild (for Go code changes):
+```bash
+cd /opt/topoviewer-dev
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o dist/topoviewer go_cloudshellwrapper/cmd/main.go
+sudo cp dist/topoviewer /opt/topoviewer/topoviewer
+# Then restart as above
+```
+
+## Key Files to Edit
+
+| Change Type | Files |
+|-------------|-------|
+| Frontend UI/panels | `html-template/clab/dev.html.tmpl`, `index.html.tmpl` |
+| Frontend JS logic | `html-static/js/dev.js` |
+| CSS styling | `html-static/css/style.css`, `cy-style-dark.json` |
+| API endpoints | `go_cloudshellwrapper/cmdClab.go`, `clabHandlers/*.go` |
+| Topology parsing | `go_topoengine/adaptorClab.go` |
+| WebSocket/terminal | `go_xtermjs/handler_websocket.go`, `utils.go` |
+
+## Common Issues
+
+### WebSocket fails through reverse proxy/tunnel
+Add hostname to `--allowed-hostnames` flag. The check is in `go_xtermjs/utils.go:16-28`.
+
+### JS/CSS changes not reflecting through Cloudflare
+Browser and Cloudflare cache JS files aggressively. **Update version parameters** when modifying:
+
+```bash
+# Bump version in templates (for dev.js changes)
+sed -i 's/dev.js?ver=[0-9]*/dev.js?ver=YYYYMMDD/g' html-template/clab/*.tmpl
+
+# Bump version in index.html (for terminal.js changes)
+sed -i 's/terminal.js?v=[0-9]*/terminal.js?v=YYYYMMDD/g' html-static/js/cloudshell/index.html
+
+# Bump version in dev.js (for cloudshell/index.html changes)
+sed -i 's/index.html?v=[0-9]*/index.html?v=YYYYMMDD/g' html-static/js/dev.js
+```
+
+**Cache chain:** `dev.html.tmpl` → `dev.js` → `cloudshell/index.html` → `terminal.js`
+
+### Verify service is running
+```bash
+ps aux | grep "topoviewer clab"
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/
+```
+
+## Terminal Auto-Login by Device Kind
+The terminal (`html-static/js/cloudshell/terminal.js`) uses device-specific login commands:
+
+| Kind | Command |
+|------|---------|
+| `linux` | `docker exec -it <container> bash` |
+| `cisco_iol` | `sshpass -p 'admin' ssh admin@...` |
+| `ceos` | `sshpass -p 'admin' ssh admin@...` |
+| `crpd` | `sshpass -p 'clab123' ssh root@...` |
+| `paloalto_panos` | `sshpass -p 'admin' ssh admin@...` |
+| Others | `ssh admin@...` (manual password) |
+
+To add new device types, edit `terminal.js` and add a new `else if (nodeKind === '...')` block.
+
+## Access URLs
+- TopoViewer: `http://localhost:8080` or `https://clab1-topo.netpilot.io`
+- ContainerLab Graph: `http://localhost:50081`

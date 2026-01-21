@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc:*)",
+      "Bash(grep:*)",
+      "Bash(cat:*)",
+      "Bash(go version:*)",
+      "Bash(/opt/topoviewer-dev/dist/topoviewer:*)",
+      "Bash(/opt/topoviewer/topoviewer:*)",
+      "Bash(ss:*)",
+      "Bash(netstat:*)",
+      "Bash(systemctl:*)",
+      "Bash(sudo pkill:*)",
+      "Bash(curl:*)",
+      "Bash(sudo cp:*)",
+      "Bash(ssh:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker inspect:*)",
+      "Bash(getent hosts:*)",
+      "Bash(echo:*)",
+      "Bash(sudo containerlab inspect:*)",
+      "Bash(python3:*)",
+      "Bash(sudo containerlab destroy:*)",
+      "Bash(containerlab deploy:*)",
+      "Bash(docker exec:*)",
+      "Bash(sshpass -p 'multit00l' ssh -o StrictHostKeyChecking=no admin@clab-mpls-lab-Client1 \"hostname && id\")",
+      "Bash(timeout 5 ssh:*)",
+      "Bash(sshpass -V:*)",
+      "Bash(sudo sed:*)"
+    ]
+  }
+}

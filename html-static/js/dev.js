@@ -11,7 +11,7 @@ var globalSelectedEdge
 var linkEndpointVisibility = true;
 var nodeContainerStatusVisibility = false;
 
-var globalShellUrl = "/js/cloudshell"
+var globalShellUrl = "/js/cloudshell/index.html?v=20260121c"
 
 var labName
 
@@ -694,13 +694,31 @@ document.addEventListener("DOMContentLoaded", async function () {
             });
             layout.run();
 
-            // remove node topoviewer
+            // remove node topoviewer and clean up orphaned parent references
             topoViewerNode = cy.filter('node[name = "topoviewer"]');
-            topoViewerNode.remove();
+            if (topoViewerNode.length > 0) {
+                const topoViewerNodeId = topoViewerNode.id();
+                // Remove parent references from children before removing the parent node
+                cy.nodes().forEach(function(node) {
+                    if (node.data('parent') === topoViewerNodeId) {
+                        node.move({ parent: null });
+                    }
+                });
+                topoViewerNode.remove();
+            }
 
-            // remove node TopoViewerParentNode
+            // remove node TopoViewerParentNode and clean up orphaned parent references
             topoViewerParentNode = cy.filter('node[name = "TopoViewer:1"]');
-            topoViewerParentNode.remove();
+            if (topoViewerParentNode.length > 0) {
+                const parentNodeId = topoViewerParentNode.id();
+                // Remove parent references from children before removing the parent node
+                cy.nodes().forEach(function(node) {
+                    if (node.data('parent') === parentNodeId) {
+                        node.move({ parent: null });
+                    }
+                });
+                topoViewerParentNode.remove();
+            }
 
             var cyExpandCollapse = cy.expandCollapse({
                 layoutBy: null, // null means use existing layout
@@ -2076,10 +2094,12 @@ async function sshWebBased(event) {
         console.info("sshWebBased - environments: ", environments)
         cytoTopologyJson = environments["EnvCyTopoJsonBytes"]
         routerData = findCytoElementByLongname(cytoTopologyJson, routerName)
+        var nodeKind = routerData["data"]["extraData"]["kind"] || "default"
+        var nodeImage = routerData["data"]["extraData"]["image"] || ""
 
-        console.info("sshWebBased: ", `${globalShellUrl}?RouterID=${routerData["data"]["extraData"]["mgmtIpv4Addresss"]}?RouterName=${routerName}`)
+        console.info("sshWebBased: ", `${globalShellUrl}?RouterID=${routerData["data"]["extraData"]["mgmtIpv4Addresss"]}?RouterName=${routerName}?Kind=${nodeKind}?Image=${encodeURIComponent(nodeImage)}`)
 
-        window.open(`${globalShellUrl}?RouterID=${routerData["data"]["extraData"]["mgmtIpv4Addresss"]}?RouterName=${routerName}`);
+        window.open(`${globalShellUrl}?RouterID=${routerData["data"]["extraData"]["mgmtIpv4Addresss"]}?RouterName=${routerName}?Kind=${nodeKind}?Image=${encodeURIComponent(nodeImage)}`);
 
     } catch (error) {
         console.error('Error executing restore configuration:', error);
