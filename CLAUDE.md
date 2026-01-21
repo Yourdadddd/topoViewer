@@ -69,17 +69,17 @@ Add hostname to `--allowed-hostnames` flag. The check is in `go_xtermjs/utils.go
 Browser and Cloudflare cache JS files aggressively. **Update version parameters** when modifying:
 
 ```bash
-# Bump version in templates (for dev.js changes)
-sed -i 's/dev.js?ver=[0-9]*/dev.js?ver=YYYYMMDD/g' html-template/clab/*.tmpl
-
-# Bump version in index.html (for terminal.js changes)
-sed -i 's/terminal.js?v=[0-9]*/terminal.js?v=YYYYMMDD/g' html-static/js/cloudshell/index.html
-
-# Bump version in dev.js (for cloudshell/index.html changes)
-sed -i 's/index.html?v=[0-9]*/index.html?v=YYYYMMDD/g' html-static/js/dev.js
+# Bump ALL versions at once (recommended - use YYYYMMDD format, add letter suffix for same-day updates)
+cd /opt/topoviewer-dev
+VERSION=20260122  # or 20260122a, 20260122b for multiple updates same day
+sed -i "s/terminal.js?v=[0-9a-z]*/terminal.js?v=${VERSION}/g" html-static/js/cloudshell/index.html
+sed -i "s/index.html?v=[0-9a-z]*/index.html?v=${VERSION}/g" html-static/js/dev.js
+sed -i "s/dev.js?ver=[0-9a-z]*/dev.js?ver=${VERSION}/g" html-template/clab/*.tmpl
 ```
 
 **Cache chain:** `dev.html.tmpl` → `dev.js` → `cloudshell/index.html` → `terminal.js`
+
+**Current version:** `20260121f` (bump this for next update)
 
 ### Verify service is running
 ```bash
@@ -90,16 +90,21 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/
 ## Terminal Auto-Login by Device Kind
 The terminal (`html-static/js/cloudshell/terminal.js`) uses device-specific login commands:
 
-| Kind | Command |
-|------|---------|
-| `linux` | `docker exec -it <container> bash` |
-| `cisco_iol` | `sshpass -p 'admin' ssh admin@...` |
-| `ceos` | `sshpass -p 'admin' ssh admin@...` |
-| `crpd` | `sshpass -p 'clab123' ssh root@...` |
-| `paloalto_panos` | `sshpass -p 'admin' ssh admin@...` |
-| Others | `ssh admin@...` (manual password) |
+| Kind | Vendor | Credentials | Command |
+|------|--------|-------------|---------|
+| `linux` + image contains "frr" | FRRouting | - | `docker exec -it <container> vtysh` |
+| `linux` | Linux containers | - | `docker exec -it <container> bash` |
+| `cisco_iol` | Cisco IOL | admin/admin | `sshpass` |
+| `arista_ceos` | Arista cEOS | admin/admin | `sshpass` |
+| `juniper_crpd` | Juniper cRPD | root/clab123 | `sshpass` |
+| `paloalto_panos` | Palo Alto PAN | admin/Admin@123 | `sshpass` |
+| `nokia_srlinux` | Nokia SR Linux | admin/NokiaSrl1! | `sshpass` |
+| `vyosnetworks_vyos` | VyOS | admin/admin | `sshpass` |
+| `fortinet_fortigate` | Fortinet FortiGate | admin/admin | `sshpass` |
+| Others | Fallback | - | `ssh admin@...` (manual password) |
 
 To add new device types, edit `terminal.js` and add a new `else if (nodeKind === '...')` block.
+Reference: https://containerlab.dev/manual/kinds/
 
 ## Access URLs
 - TopoViewer: `http://localhost:8080` or `https://clab1-topo.netpilot.io`
