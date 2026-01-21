@@ -1,22 +1,21 @@
 (function() {
 	// Function to get query parameters
+	// Note: This app uses ? as separator between params (not standard &)
 	var urlParam = function(name, w) {
 		w = w || window;
-		var rx = new RegExp('[\&|\?]' + name + '=([^\&\#]+)'),
+		var rx = new RegExp('[\&|\?]' + name + '=([^\&\#\?]+)'),
 			val = w.location.search.match(rx);
 		return !val ? '' : val[1];
 	};
 
-	// Retrieve the RouterID query parameter
+	// Retrieve the RouterID and RouterName query parameters
 	var routerId = urlParam('RouterID');
-	
+	var routerNameForTitle = urlParam('RouterName');
+
 	console.log("routerId:", routerId);
+	console.log("routerNameForTitle:", routerNameForTitle);
 
-	// Process the routerId string
-	var split1 = routerId.toString().split("?");
-	console.log(split1[1].split("=")[1])
-
-	document.title = `TopoViewer::${split1[1].split("=")[1]}`;
+	document.title = `TopoViewer::${routerNameForTitle || routerId}`;
 
 
 	// Initialize the terminal with the desired options
