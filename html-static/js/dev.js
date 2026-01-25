@@ -11,7 +11,7 @@ var globalSelectedEdge
 var linkEndpointVisibility = true;
 var nodeContainerStatusVisibility = false;
 
-var globalShellUrl = "/js/cloudshell/index.html?v=20260123"
+var globalShellUrl = "/js/cloudshell/index.html?v=20260125"
 
 var labName
 

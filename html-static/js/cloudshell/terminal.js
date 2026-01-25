@@ -99,8 +99,8 @@
 			// VyOS: admin/admin
 			terminalCommand = "sshpass -p 'admin' ssh -q -o StrictHostKeyChecking=no admin@" + routerName;
 		} else if (nodeKind === 'fortinet_fortigate') {
-			// Fortinet FortiGate: admin/Admin123!@#$
-			terminalCommand = "sshpass -p 'Admin123!@#$' ssh -q -o StrictHostKeyChecking=no admin@" + routerName;
+			// Fortinet FortiGate: admin/Fortinet!1234 (FortiOS 7.6.5+ policy-compliant)
+			terminalCommand = "sshpass -p 'Fortinet!1234' ssh -q -o StrictHostKeyChecking=no admin@" + routerName;
 		} else {
 			// Other network devices: use SSH with admin user (default fallback, no auto-password)
 			terminalCommand = "ssh -q -o StrictHostKeyChecking=no admin@" + routerName;

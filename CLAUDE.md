@@ -100,7 +100,7 @@ The terminal (`html-static/js/cloudshell/terminal.js`) uses device-specific logi
 | `paloalto_panos` | Palo Alto PAN | admin/Admin@123 | `sshpass` |
 | `nokia_srlinux` | Nokia SR Linux | admin/NokiaSrl1! | `sshpass` |
 | `vyosnetworks_vyos` | VyOS | admin/admin | `sshpass` |
-| `fortinet_fortigate` | Fortinet FortiGate | admin/Admin123!@#$ | `sshpass` |
+| `fortinet_fortigate` | Fortinet FortiGate | admin/Fortinet!1234 | `sshpass` |
 | Others | Fallback | - | `ssh admin@...` (manual password) |
 
 To add new device types, edit `terminal.js` and add a new `else if (nodeKind === '...')` block.
