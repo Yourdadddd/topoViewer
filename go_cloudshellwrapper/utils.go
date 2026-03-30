@@ -72,6 +72,9 @@ func addIncomingRequestLogging(next http.Handler) http.Handler {
 				createRequestLog(r).Info("request errored out")
 			}
 		}()
+		// Prevent Cloudflare edge and browsers from caching responses so that
+		// topology changes are reflected immediately through the tunnel.
+		w.Header().Set("Cache-Control", "no-store")
 		next.ServeHTTP(w, r)
 		duration := time.Since(startTime)
 		createRequestLog(r).Infof("request completed in %vms", float64(duration.Nanoseconds())/1000000)
