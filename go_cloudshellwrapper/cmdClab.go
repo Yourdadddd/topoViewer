@@ -196,28 +196,36 @@ func checkSudoAccess() {
 }
 
 func reloadTopoFile() error {
-	// Load topology file path from configuration
-	topoFile := confClab.GetString("topology-file-json")
-
-	// Check if topoFile is empty
-	if topoFile == "" {
-		log.Error("topoFile is empty. Please provide a valid file.")
-		return errors.New("topoFile is empty")
-	}
-
-	// Reload and process the topoFile
 	cyTopo := topoengine.CytoTopology{}
-	loadedTopoFile := cyTopo.ClabTopoJsonRead(topoFile) // Reads the topology file
-	if loadedTopoFile == nil {
-		log.Error("Failed to reload topoFile.")
-		return errors.New("failed to reload topoFile")
+	clabHostUsername := confClab.GetString("clab-user")
+	var initNodeEndpointDetailSourceTarget []byte
+	var topoFile []byte
+
+	topoClabYaml := confClab.GetString("topology-file-yaml")
+	topoClabJson := confClab.GetString("topology-file-json")
+
+	if topoClabYaml != "" && topoClabYaml != "." {
+		// YAML path: regenerate JSON from YAML (mirrors Clab() startup logic)
+		clabJsonTopoFilePath, err := cyTopo.GenerateClabTopoFromYaml(topoClabYaml)
+		if err != nil {
+			log.Errorf("reloadTopoFile: failed to generate JSON from YAML: %v", err)
+			return fmt.Errorf("failed to generate JSON from YAML: %w", err)
+		}
+		topoFile = cyTopo.ClabTopoJsonRead(clabJsonTopoFilePath)
+		if topoFile == nil {
+			return errors.New("failed to read generated JSON topology file")
+		}
+	} else if topoClabJson != "" && topoClabJson != "." {
+		// JSON path: read directly
+		topoFile = cyTopo.ClabTopoJsonRead(topoClabJson)
+		if topoFile == nil {
+			return errors.New("failed to read JSON topology file")
+		}
+	} else {
+		return errors.New("no topology file configured (neither YAML nor JSON)")
 	}
 
-	// Process the reloaded topoFile
-	var initNodeEndpointDetailSourceTarget []byte
-	cyTopoJsonBytes := cyTopo.UnmarshalContainerLabTopoV2(loadedTopoFile, confClab.GetString("clab-user"), initNodeEndpointDetailSourceTarget)
-
-	// Print or store the reloaded topology data (for visualization, debugging, etc.)
+	cyTopoJsonBytes := cyTopo.UnmarshalContainerLabTopoV2(topoFile, clabHostUsername, initNodeEndpointDetailSourceTarget)
 	cyTopo.PrintjsonBytesCytoUiV2(cyTopoJsonBytes)
 
 	log.Info("Topology file reloaded successfully.")
