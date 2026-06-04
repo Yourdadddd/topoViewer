@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html lang="en" id="root">
 	<head>
+			<!-- Silence verbose console.log/info/debug from the topology engine
+			     by default; keep warn/error so real problems still surface.
+			     Re-enable with ?debug=1 or localStorage.topoviewerDebug='1'. -->
+			<script>
+				(function () {
+					try {
+						var on = /[?&]debug=1(?:&|$)/.test(location.search) ||
+							(window.localStorage && localStorage.getItem("topoviewerDebug") === "1");
+						if (!on) {
+							var noop = function () {};
+							console.log = noop;
+							console.info = noop;
+							console.debug = noop;
+						}
+					} catch (e) { /* never let logging setup break the page */ }
+				})();
+			</script>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>TopoViewer</title>
