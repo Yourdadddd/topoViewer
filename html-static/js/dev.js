@@ -11,7 +11,7 @@ var globalSelectedEdge
 var linkEndpointVisibility = true;
 var nodeContainerStatusVisibility = false;
 
-var globalShellUrl = "/js/cloudshell/index.html?v=20260604a"
+var globalShellUrl = "/js/cloudshell/index.html?v=20260604b"
 
 var labName
 
@@ -984,7 +984,12 @@ document.addEventListener("DOMContentLoaded", async function () {
                     document.getElementById("panel-node").style.display = "none";
                 }
 
-                document.getElementById("panel-node-name").textContent = node.data("extraData").longname;
+                // Show the short device name (e.g. "R1"); the topology name is
+                // already on the page, so the clab-<topo>-<node> longname is
+                // redundant here. globalSelectedNode below stays the longname —
+                // the SSH/terminal lookup keys off it.
+                document.getElementById("panel-node-name").textContent =
+                    node.data("extraData").shortname || node.data("extraData").longname;
                 // arafat-tag: vs-code
                 // document.getElementById("panel-node-status").textContent = node.data("containerDockerExtraAttribute").status;
                 document.getElementById("panel-node-kind").textContent = node.data("extraData").kind;
