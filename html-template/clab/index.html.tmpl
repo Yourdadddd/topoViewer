@@ -494,112 +494,50 @@
 
 			<div class="panel panel-overlay is-link" id="panel-node" style="display: none;">
 				<p class="panel-heading is-size-7">Node Properties</p>
-				<div  class="panel-tabContainer">
-					<div  class="panel-block p-0">
-						<div  class="column px-0">
-							<div  class="column my-auto is-11">
-								<div  class="panel-content">
-									<div class="columns py-auto" >
-										<div class="column is-4 p-1"><label class="label is-size-7 has-text-right has-text-weight-medium px-auto" >Node Name</label></div>
-										<div class="column is-8 p-1 pl-3">
-											<label class="label is-size-7 has-text-left link-impairment-widht has-text-weight-normal mr-0 is-max-content" id="panel-node-name">node-name-placeholder</label>
-										</div>
-									</div>
-								</div>
-							</div>
-							<div  class="column my-auto is-11">
+				<div class="panel-tabContainer">
+					<div class="panel-block p-0">
+						<div class="column px-0">
+							<div class="column my-auto is-11">
 								<div class="panel-content">
-									<div class="columns py-auto" >
-										<div  class="column is-4 p-1"><label class="label is-size-7 has-text-right has-text-weight-medium px-auto" ></label></div>
-										<div class="column is-8 p-1 pl-3" >
-											<div class="dropdown is-hoverable">
-												<div class="dropdown-trigger">
-													<button class="button label has-text-weight-normal is-small py-0" aria-haspopup="true" aria-controls="dropdown-menu">
-													<span>Actions</span>
-													<span class="icon is-small">
-													<i class="fas fa-angle-down" aria-hidden="true"></i>
-													</span>
-													</button>
-												</div>
-												<div class="dropdown-menu" id="panel-node-action-dropdown-menu" role="menu">
-													<div class="dropdown-content">
-														<a onclick="sshWebBased(event);"       class="dropdown-item label has-text-weight-normal is-small py-0" id="panel-node-action-ssh-web-based">SSH - Launch Web-Based</a>
-														<a onclick="sshCliCommandCopy(event);" class="dropdown-item label has-text-weight-normal is-small py-0" id="panel-node-action-ssh-copy-cli-command">SSH - Copy to Clipboard</a>
-														<hr class="dropdown-divider" />
-														<a onclick="backupRestoreNodeConfig(event);" class="dropdown-item label has-text-weight-normal is-small py-0"> Backup-Restore Config </a>
-														<a href="#" class="dropdown-item label has-text-weight-normal is-small py-0"> Reboot </a>
-													</div>
-												</div>
-											</div>
+									<div class="columns py-auto">
+										<div class="column is-4 p-1"><label class="label is-size-7 has-text-right has-text-weight-medium px-auto">Node Name</label></div>
+										<div class="column is-8 p-1 pl-3"><label class="label is-size-7 has-text-left link-impairment-widht has-text-weight-normal mr-0 is-max-content" id="panel-node-name">node-name-placeholder</label></div>
+									</div>
+								</div>
+							</div>
+							<div class="column my-auto is-11">
+								<div class="panel-content">
+									<div class="columns py-auto">
+										<div class="column is-4 p-1"><label class="label is-size-7 has-text-right has-text-weight-medium px-auto">Management IP</label></div>
+										<div class="column is-8 p-1 pl-3"><label class="label is-size-7 has-text-left link-impairment-widht has-text-weight-normal mr-0 is-max-content" id="panel-node-mgmtipv4">node-mgmtipv4-placeholder</label></div>
+									</div>
+								</div>
+							</div>
+							<div class="column my-auto is-11">
+								<div class="panel-content">
+									<div class="columns py-auto">
+										<div class="column is-4 p-1"><label class="label is-size-7 has-text-right has-text-weight-medium px-auto">Kind</label></div>
+										<div class="column is-8 p-1 pl-3"><label class="label is-size-7 has-text-left link-impairment-widht has-text-weight-normal mr-0 is-max-content" id="panel-node-kind">node-kind-placeholder</label></div>
+									</div>
+								</div>
+							</div>
+							<div class="column my-auto is-11">
+								<div class="panel-content">
+									<div class="columns py-auto">
+										<div class="column is-4 p-1"><label class="label is-size-7 has-text-right has-text-weight-medium px-auto">Image</label></div>
+										<div class="column is-8 p-1 pl-3"><label class="label is-size-7 has-text-left link-impairment-widht has-text-weight-normal mr-0 is-max-content" id="panel-node-image">node-image-placeholder</label></div>
+									</div>
+								</div>
+							</div>
+							<div class="column my-auto is-11">
+								<div class="panel-content">
+									<div class="columns py-auto">
+										<div class="column p-1">
+											<button onclick="sshWebBased(event);" id="panel-node-action-ssh-web-based" class="button is-link is-small is-fullwidth">
+												<span class="icon is-small"><i class="fas fa-terminal" aria-hidden="true"></i></span>
+												<span>Terminal</span>
+											</button>
 										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div  class="panel-block p-0">
-						<div  class="column px-0">
-							<div  class="column my-auto is-11">
-								<div  class="panel-content">
-									<div class="columns py-auto" >
-										<div  class="column is-4 p-1"><label class="label is-size-7 has-text-right has-text-weight-medium px-auto" >Status</label></div>
-										<div class="column is-8 p-1 pl-3" ><label class="label is-size-7 has-text-left link-impairment-widht has-text-weight-normal mr-0 is-max-content" id="panel-node-status">node-status-placeholder</label></div>
-									</div>
-								</div>
-							</div>
-							<div  class="column my-auto is-11">
-								<div  class="panel-content">
-									<div class="columns py-auto" >
-										<div  class="column is-4 p-1"><label class="label is-size-7 has-text-right has-text-weight-medium px-auto" >Kind</label></div>
-										<div class="column is-8 p-1 pl-3" ><label class="label is-size-7 has-text-left link-impairment-widht has-text-weight-normal mr-0 is-max-content" id="panel-node-kind">node-kind-placeholder</label></div>
-									</div>
-								</div>
-							</div>
-							<div  class="column my-auto is-11">
-								<div  class="panel-content">
-									<div class="columns py-auto" >
-										<div  class="column is-4 p-1"><label class="label is-size-7 has-text-right has-text-weight-medium px-auto" >Image</label></div>
-										<div class="column is-8 p-1 pl-3" ><label class="label is-size-7 has-text-left link-impairment-widht has-text-weight-normal mr-0 is-max-content" id="panel-node-image">node-image-placeholder</label></div>
-									</div>
-								</div>
-							</div>
-							<div  class="column my-auto is-11">
-								<div  class="panel-content">
-									<div class="columns py-auto" >
-										<div  class="column is-4 p-1"><label class="label is-size-7 has-text-right has-text-weight-medium px-auto" >Management IPv4</label></div>
-										<div class="column is-8 p-1 pl-3" ><label class="label is-size-7 has-text-left link-impairment-widht has-text-weight-normal mr-0 is-max-content" id="panel-node-mgmtipv4">node-mgmtipv4-placeholder</label></div>
-									</div>
-								</div>
-							</div>
-							<div  class="column my-auto is-11">
-								<div  class="panel-content">
-									<div class="columns py-auto" >
-										<div  class="column is-4 p-1"><label class="label is-size-7 has-text-right has-text-weight-medium px-auto" >Management IPv6</label></div>
-										<div class="column is-8 p-1 pl-3" ><label class="label is-size-7 has-text-left link-impairment-widht has-text-weight-normal mr-0 is-max-content" id="panel-node-mgmtipv6">node-mgmtipv6-placeholder</label></div>
-									</div>
-								</div>
-							</div>
-							<div  class="column my-auto is-11">
-								<div  class="panel-content">
-									<div class="columns py-auto" >
-										<div  class="column is-4 p-1"><label class="label is-size-7 has-text-right has-text-weight-medium px-auto" >FQDN</label></div>
-										<div class="column is-8 p-1 pl-3" ><label class="label is-size-7 has-text-left link-impairment-widht has-text-weight-normal mr-0 is-max-content" id="panel-node-fqdn">node-fqdn-placeholder</label></div>
-									</div>
-								</div>
-							</div>
-							<div  class="column my-auto is-11">
-								<div  class="panel-content">
-									<div class="columns py-auto" >
-										<div  class="column is-4 p-1"><label class="label is-size-7 has-text-right has-text-weight-medium px-auto" >Group</label></div>
-										<div class="column is-8 p-1 pl-3" ><label class="label is-size-7 has-text-left link-impairment-widht has-text-weight-normal mr-0 is-max-content" id="panel-node-group">node-group-placeholder</label></div>
-									</div>
-								</div>
-							</div>
-							<div  class="column my-auto is-11">
-								<div  class="panel-content">
-									<div class="columns py-auto" >
-										<div  class="column is-4 p-1"><label class="label is-size-7 has-text-right has-text-weight-medium px-auto" >TopoViewer Role</label></div>
-										<div class="column is-8 p-1 pl-3" ><label class="label is-size-7 has-text-left link-impairment-widht has-text-weight-normal mr-0 is-max-content"id="panel-node-topoviewerrole">node-topoviewerrole-placeholder</label></div>
 									</div>
 								</div>
 							</div>
@@ -1136,7 +1074,7 @@
 			
 			
 
-			<script src="js/dev.js?ver=20260125"></script>
+			<script src="js/dev.js?ver=20260604"></script>
 			
 			<script src="/js/backupRestore.js?ver=1"></script>
 			<script src="/js/managerClabEditor.js?ver=1"></script>

@@ -11,7 +11,7 @@ var globalSelectedEdge
 var linkEndpointVisibility = true;
 var nodeContainerStatusVisibility = false;
 
-var globalShellUrl = "/js/cloudshell/index.html?v=20260125"
+var globalShellUrl = "/js/cloudshell/index.html?v=20260604"
 
 var labName
 
@@ -990,10 +990,6 @@ document.addEventListener("DOMContentLoaded", async function () {
                 document.getElementById("panel-node-kind").textContent = node.data("extraData").kind;
                 document.getElementById("panel-node-image").textContent = node.data("extraData").image;
                 document.getElementById("panel-node-mgmtipv4").textContent = node.data("extraData").mgmtIpv4Addresss;
-                document.getElementById("panel-node-mgmtipv6").textContent = node.data("extraData").mgmtIpv6Address;
-                document.getElementById("panel-node-fqdn").textContent = node.data("extraData").fqdn;
-                document.getElementById("panel-node-group").textContent = node.data("extraData").group;
-                document.getElementById("panel-node-topoviewerrole").textContent = node.data("topoViewerRole");
 
                 // Set selected node-long-name to global variable
                 globalSelectedNode = node.data("extraData").longname;
