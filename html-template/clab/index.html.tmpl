@@ -24,7 +24,7 @@
 		<link rel="stylesheet" href="js/library/bulma-1-0-0.min.css?ver=1">
 		
 
-		<link rel="stylesheet" href="css/style.css?ver=20251227" />
+		<link rel="stylesheet" href="css/style.css?ver=20260604a" />
 
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 		<link rel="stylesheet" href="css/cytoscape-leaflet.css?ver=1" /> 
@@ -510,56 +510,16 @@
 			</div>
 
 			<div class="panel panel-overlay is-link" id="panel-node" style="display: none;">
-				<p class="panel-heading is-size-7">Node Properties</p>
-				<div class="panel-tabContainer">
-					<div class="panel-block p-0">
-						<div class="column px-0">
-							<div class="column my-auto is-11">
-								<div class="panel-content">
-									<div class="columns py-auto">
-										<div class="column is-4 p-1"><label class="label is-size-7 has-text-right has-text-weight-medium px-auto">Node Name</label></div>
-										<div class="column is-8 p-1 pl-3"><label class="label is-size-7 has-text-left link-impairment-widht has-text-weight-normal mr-0 is-max-content" id="panel-node-name">node-name-placeholder</label></div>
-									</div>
-								</div>
-							</div>
-							<div class="column my-auto is-11">
-								<div class="panel-content">
-									<div class="columns py-auto">
-										<div class="column is-4 p-1"><label class="label is-size-7 has-text-right has-text-weight-medium px-auto">Management IP</label></div>
-										<div class="column is-8 p-1 pl-3"><label class="label is-size-7 has-text-left link-impairment-widht has-text-weight-normal mr-0 is-max-content" id="panel-node-mgmtipv4">node-mgmtipv4-placeholder</label></div>
-									</div>
-								</div>
-							</div>
-							<div class="column my-auto is-11">
-								<div class="panel-content">
-									<div class="columns py-auto">
-										<div class="column is-4 p-1"><label class="label is-size-7 has-text-right has-text-weight-medium px-auto">Kind</label></div>
-										<div class="column is-8 p-1 pl-3"><label class="label is-size-7 has-text-left link-impairment-widht has-text-weight-normal mr-0 is-max-content" id="panel-node-kind">node-kind-placeholder</label></div>
-									</div>
-								</div>
-							</div>
-							<div class="column my-auto is-11">
-								<div class="panel-content">
-									<div class="columns py-auto">
-										<div class="column is-4 p-1"><label class="label is-size-7 has-text-right has-text-weight-medium px-auto">Image</label></div>
-										<div class="column is-8 p-1 pl-3"><label class="label is-size-7 has-text-left link-impairment-widht has-text-weight-normal mr-0 is-max-content" id="panel-node-image">node-image-placeholder</label></div>
-									</div>
-								</div>
-							</div>
-							<div class="column my-auto is-11">
-								<div class="panel-content">
-									<div class="columns py-auto">
-										<div class="column p-1">
-											<button onclick="sshWebBased(event);" id="panel-node-action-ssh-web-based" class="button is-link is-small is-fullwidth">
-												<span class="icon is-small"><i class="fas fa-terminal" aria-hidden="true"></i></span>
-												<span>Terminal</span>
-											</button>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
+				<p class="panel-heading is-size-7" id="panel-node-header">Node Properties</p>
+				<div class="tv-node-body">
+					<div class="tv-row"><label class="label is-size-7 tv-label">Name</label><label class="label is-size-7 tv-value" id="panel-node-name">node-name-placeholder</label></div>
+					<div class="tv-row"><label class="label is-size-7 tv-label">Mgmt IP</label><label class="label is-size-7 tv-value" id="panel-node-mgmtipv4">node-mgmtipv4-placeholder</label></div>
+					<div class="tv-row"><label class="label is-size-7 tv-label">Kind</label><label class="label is-size-7 tv-value" id="panel-node-kind">node-kind-placeholder</label></div>
+					<div class="tv-row"><label class="label is-size-7 tv-label">Image</label><label class="label is-size-7 tv-value" id="panel-node-image">node-image-placeholder</label></div>
+					<button onclick="sshWebBased(event);" id="panel-node-action-ssh-web-based" class="button is-link is-small is-fullwidth tv-term-btn">
+						<span class="icon is-small"><i class="fas fa-terminal" aria-hidden="true"></i></span>
+						<span>Terminal</span>
+					</button>
 				</div>
 			</div>
 			<div class="panel is-link" id="panel-node-editor" style="display: none;">
@@ -1091,7 +1051,7 @@
 			
 			
 
-			<script src="js/dev.js?ver=20260604"></script>
+			<script src="js/dev.js?ver=20260604a"></script>
 			
 			<script src="/js/backupRestore.js?ver=1"></script>
 			<script src="/js/managerClabEditor.js?ver=1"></script>

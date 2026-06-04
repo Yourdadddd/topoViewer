@@ -334,12 +334,45 @@ body {
 #panel-node {
   top: 85px;
   right: 40px;
-  width: 340px;
-  max-height: 700px;
+  width: 220px;
+  max-height: 70vh;
   overflow-y: auto;
   overflow-x: hidden;
   position: fixed;
   z-index: 991;
+}
+
+/* Compact, left-aligned node-properties panel + draggable header. */
+#panel-node-header {
+  cursor: move;
+  padding: 0.4em 0.75em;
+  user-select: none;
+}
+#panel-node .tv-node-body {
+  padding: 0.5em 0.75em 0.6em;
+}
+#panel-node .tv-row {
+  display: flex;
+  gap: 0.5em;
+  align-items: baseline;
+  padding: 1px 0;
+}
+#panel-node .tv-label {
+  flex: 0 0 52px;
+  margin: 0;
+  text-align: left;
+  opacity: 0.6;
+  white-space: nowrap;
+}
+#panel-node .tv-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  text-align: left;
+  word-break: break-all;
+}
+#panel-node .tv-term-btn {
+  margin-top: 0.6em;
 }
 
 #panel-node-editor {

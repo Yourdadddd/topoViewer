@@ -11,7 +11,7 @@ var globalSelectedEdge
 var linkEndpointVisibility = true;
 var nodeContainerStatusVisibility = false;
 
-var globalShellUrl = "/js/cloudshell/index.html?v=20260604"
+var globalShellUrl = "/js/cloudshell/index.html?v=20260604a"
 
 var labName
 
@@ -4724,3 +4724,41 @@ if (isVscodeDeployment) {
 }
 
 // ASAD
+// --- Draggable node-properties panel -------------------------------------
+// The #panel-node overlay is position:fixed. Let operators reposition it by
+// dragging its header so it never covers the device they're inspecting.
+function makeTvPanelDraggable(panelId, handleId) {
+    var panel = document.getElementById(panelId);
+    if (!panel) return;
+    var handle = document.getElementById(handleId) || panel;
+    var startX, startY, startLeft, startTop, dragging = false;
+    handle.addEventListener("mousedown", function (e) {
+        dragging = true;
+        var rect = panel.getBoundingClientRect();
+        // Switch from the CSS right-anchor to an explicit left-anchor so the
+        // panel tracks the cursor without jumping.
+        panel.style.left = rect.left + "px";
+        panel.style.top = rect.top + "px";
+        panel.style.right = "auto";
+        startX = e.clientX;
+        startY = e.clientY;
+        startLeft = rect.left;
+        startTop = rect.top;
+        e.preventDefault();
+        document.addEventListener("mousemove", onMove);
+        document.addEventListener("mouseup", onUp);
+    });
+    function onMove(e) {
+        if (!dragging) return;
+        panel.style.left = (startLeft + e.clientX - startX) + "px";
+        panel.style.top = (startTop + e.clientY - startY) + "px";
+    }
+    function onUp() {
+        dragging = false;
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+    }
+}
+document.addEventListener("DOMContentLoaded", function () {
+    makeTvPanelDraggable("panel-node", "panel-node-header");
+});
