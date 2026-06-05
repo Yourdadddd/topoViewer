@@ -11,7 +11,7 @@ var globalSelectedEdge
 var linkEndpointVisibility = true;
 var nodeContainerStatusVisibility = false;
 
-var globalShellUrl = "/js/cloudshell/index.html?v=20260605b"
+var globalShellUrl = "/js/cloudshell/index.html?v=20260605c"
 
 var labName
 
@@ -31,10 +31,23 @@ var vsCode
 
 /// VS-CODE BackEnd messaging handler
 
-// (Monaco AMD loader removed with the unused topology-YAML editor. The previous
-// top-level `require.config(...)` here threw "require is not defined" once
-// monaco-loader.js was no longer included, which halted dev.js and left the
-// graph blank — no nodes rendered. dev.js uses no other AMD `require`.)
+require.config({
+    paths: {
+        'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.50.0/min/vs'
+    }
+});
+
+// Example: Load Monaco Editor on DOMContentLoaded or similar
+document.addEventListener('DOMContentLoaded', function () {
+    require(['vs/editor/editor.main'], function () {
+        // Monaco is now loaded
+        // You can set up your editor or do any post-load logic here
+        console.log("Monaco Editor is initialized.");
+
+        // You might set up your editor here, for example:
+        // window.monacoEditor = monaco.editor.create(document.getElementById('editorContainer'), ...);
+    });
+});
 
 if (isVscodeDeployment) {
     // Acquire the VS Code API handle
