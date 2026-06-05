@@ -11,7 +11,7 @@ var globalSelectedEdge
 var linkEndpointVisibility = true;
 var nodeContainerStatusVisibility = false;
 
-var globalShellUrl = "/js/cloudshell/index.html?v=20260604b"
+var globalShellUrl = "/js/cloudshell/index.html?v=20260605"
 
 var labName
 
@@ -133,7 +133,8 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         // Check for required elements
         if (!divider || !dataDisplay || !rootDiv || !togglePanelButtonExpand) {
-            console.warn('One or more required elements for resizing logic are missing. Initialization aborted.');
+            // Expected in the embedded NetPilot deployment (no resizable
+            // data-display panel) — abort quietly instead of warning.
             return;
         }
 
@@ -267,8 +268,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     initViewportDrawerClabEditoCheckboxToggle()
     initViewportDrawerGeoMapCheckboxToggle()
 
-    insertAndColorSvg("nokia-logo", "white")
-
     // Reusable function to initialize a WebSocket connection
     function initializeWebSocket(url, onMessageCallback) {
         const protocol = location.protocol === "https:" ? "wss://" : "ws://";
@@ -328,8 +327,13 @@ document.addEventListener("DOMContentLoaded", async function () {
                     setNodeContainerStatus(Names, Status);
                     console.info(JSON.parse(msgContainerNodeStatus.data));
 
-                    const IPAddress = JSON.parse(msgContainerNodeStatus.data).Networks.Networks.clab.IPAddress;
-                    const GlobalIPv6Address = JSON.parse(msgContainerNodeStatus.data).Networks.Networks.clab.GlobalIPv6Address
+                    // Guard the network lookup: not every node reports a `clab`
+                    // management network (FRR/linux endpoints, host-networked
+                    // nodes), so reaching .clab.IPAddress unguarded threw on
+                    // every status tick and spammed the console.
+                    const _clabNet = JSON.parse(msgContainerNodeStatus.data)?.Networks?.Networks?.clab;
+                    const IPAddress = _clabNet?.IPAddress;
+                    const GlobalIPv6Address = _clabNet?.GlobalIPv6Address;
 
 
                     setNodeDataWithContainerAttribute(Names, Status, State, IPAddress, GlobalIPv6Address);
@@ -3536,10 +3540,9 @@ function insertAndColorSvg(containerId, color) {
     container.appendChild(svgElement);
 }
 
-// Call the function during initialization
-document.addEventListener('DOMContentLoaded', () => {
-    insertAndColorSvg('nokia-logo', 'white');
-});
+// (Nokia-logo branding removed — the element doesn't exist in the embedded
+// NetPilot deployment and only produced "Container with ID nokia-logo not
+// found." console errors.)
 
 
 function avoidEdgeLabelOverlap(cy) {
@@ -4025,8 +4028,6 @@ function loadCytoStyle(cy) {
                 "source-text-offset": 20,
                 "target-text-offset": 20,
                 "arrow-scale": "0.5",
-                "source-text-color": "#000000",
-                "target-text-color": "#000000",
                 "text-outline-width": "0.3px",
                 "text-outline-color": "#FFFFFF",
                 "text-background-color": "#CACBCC",
