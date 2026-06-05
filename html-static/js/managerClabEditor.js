@@ -4,26 +4,18 @@
 // Declare global variables at the top
 var yamlTopoContent;
 
-// Create a Promise to track when the Monaco Editor is ready
-let monacoEditorReady = new Promise((resolve) => {
-	// Configure Monaco Editor paths
-	require.config({
-		paths: {
-			'vs': ' https://cdn.jsdelivr.net/npm/monaco-editor@0.50.0/min/vs'
-		}
-	});
-
-	require(['vs/editor/editor.main'], function() {
-		// Initialize the Monaco Editor
-		window.monacoEditor = monaco.editor.create(document.getElementById('panel-clab-editor-text-area'), {
-			value: '', // Initial content will be set later
-			language: 'yaml', // Set the language mode
-			theme: 'vs-dark', // Optional: Set editor theme
-			automaticLayout: true // Adjust layout automatically
-		});
-		resolve(); // Resolve the Promise when the editor is ready
-	});
-});
+// Monaco Editor removed — the topology-YAML editor is unused in the NetPilot
+// embed and pulled Monaco from cdn.jsdelivr.net (console worker/CORS errors +
+// breaks air-gapped). This file stays because dev.js calls its init helpers
+// (initializeDropdownListeners / initializeDropdownTopoViewerRoleListeners) and
+// node/edge editor functions at startup; only the editor itself is removed.
+// A resolved readiness promise + a no-op editor handle keep every dependent
+// function safe (the editor UI is also unreachable — its button is removed).
+let monacoEditorReady = Promise.resolve();
+window.monacoEditor = {
+	getValue: () => "",
+	setValue: () => {},
+};
 
 
 
