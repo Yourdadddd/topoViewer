@@ -11,7 +11,7 @@ var globalSelectedEdge
 var linkEndpointVisibility = true;
 var nodeContainerStatusVisibility = false;
 
-var globalShellUrl = "/js/cloudshell/index.html?v=20260605d"
+var globalShellUrl = "/js/cloudshell/index.html?v=20260605e"
 
 var labName
 
@@ -269,7 +269,8 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         socket.onclose = (event) => {
             console.info(`Socket to ${url} closed: `, event);
-            socket.send("Client Closed!");
+            // (Don't socket.send() here — the socket is already closed, which
+            // only logged "WebSocket is already in CLOSING or CLOSED state".)
         };
 
         socket.onerror = (error) => {
@@ -394,7 +395,10 @@ document.addEventListener("DOMContentLoaded", async function () {
             selector: "node",
             style: {
                 "background-color": "#3498db",
-                label: "data(label)",
+                // Nodes carry their label in `name`, not `label` — `data(label)`
+                // warned "no mapping for property label" for every node until
+                // loadCytoStyle() swapped in the real stylesheet.
+                label: "data(name)",
             },
         },],
         boxSelectionEnabled: true,
