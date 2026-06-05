@@ -11,7 +11,7 @@ var globalSelectedEdge
 var linkEndpointVisibility = true;
 var nodeContainerStatusVisibility = false;
 
-var globalShellUrl = "/js/cloudshell/index.html?v=20260605e"
+var globalShellUrl = "/js/cloudshell/index.html?v=20260605f"
 
 var labName
 
@@ -2630,35 +2630,6 @@ async function getActualNodesEndpoints(event) {
     }
 }
 
-function viewportButtonsZoomToFit() {
-    const initialZoom = cy.zoom();
-    appendMessage(`Bro, initial zoom level is "${initialZoom}".`);
-    console.info(`Bro, initial zoom level is "${initialZoom}".`);
-    // Fit all nodes possible with padding
-    // Fit all nodes possible with padding
-    cy.fit();
-    const currentZoom = cy.zoom();
-    appendMessage(`And now the zoom level is "${currentZoom}".`);
-    console.info(`And now the zoom level is "${currentZoom}".`);
-
-    // cytoscapeLeafletLeaf instance map to fit nodes
-    cytoscapeLeafletLeaf.fit();
-    console.log("cytoscapeLeafletLeaf.fit()")
-
-}
-
-function viewportButtonsLayoutAlgo() {
-    var viewportDrawer = document.getElementsByClassName("viewport-drawer");
-    // Loop through each element and set its display to 'none'
-    for (var i = 0; i < viewportDrawer.length; i++) {
-        viewportDrawer[i].style.display = "none";
-    }
-
-    viewportDrawerLayout = document.getElementById("viewport-drawer-layout")
-    viewportDrawerLayout.style.display = "block"
-}
-
-
 function viewportNodeFindEvent(event) {
     // Get a reference to your Cytoscape instance (assuming it's named 'cy')
     // const cy = window.cy; // Replace 'window.cy' with your actual Cytoscape instance
@@ -2809,93 +2780,6 @@ async function layoutAlgoChange(event) {
         // Handle errors as needed
     }
 }
-
-
-function viewportButtonsTopologyOverview() {
-    var viewportDrawer = document.getElementsByClassName("viewport-drawer");
-    // Loop through each element and set its display to 'none'
-    for (var i = 0; i < viewportDrawer.length; i++) {
-        viewportDrawer[i].style.display = "none";
-    }
-
-    console.info("viewportButtonsTopologyOverview clicked")
-    viewportDrawerLayout = document.getElementById("viewport-drawer-topology-overview")
-    viewportDrawerLayout.style.display = "block"
-
-    viewportDrawerLayoutContent = document.getElementById("viewport-drawer-topology-overview-content")
-    viewportDrawerLayoutContent.style.display = "block"
-}
-
-function viewportButtonsTopologyCapture() {
-    var viewportDrawer = document.getElementsByClassName("viewport-drawer");
-    // Loop through each element and set its display to 'none'
-    for (var i = 0; i < viewportDrawer.length; i++) {
-        viewportDrawer[i].style.display = "none";
-    }
-
-    console.info("viewportButtonsTopologyCapture clicked")
-
-    viewportDrawerCapture = document.getElementById("viewport-drawer-capture-sceenshoot")
-    viewportDrawerCapture.style.display = "block"
-
-    viewportDrawerCaptureContent = document.getElementById("viewport-drawer-capture-sceenshoot-content")
-    viewportDrawerCaptureContent.style.display = "block"
-
-    viewportDrawerCaptureButton = document.getElementById("viewport-drawer-capture-sceenshoot-button")
-    viewportDrawerCaptureButton.style.display = "block"
-}
-
-function viewportButtonsLabelEndpoint() {
-    if (linkEndpointVisibility) {
-        cy.edges().forEach(function (edge) {
-            edge.style("text-opacity", 0);
-            edge.style("text-background-opacity", 0);
-            linkEndpointVisibility = false;
-        });
-
-    } else {
-        cy.edges().forEach(function (edge) {
-            edge.style("text-opacity", 1);
-            edge.style("text-background-opacity", 0.7);
-            linkEndpointVisibility = true;
-        });
-    }
-}
-
-function viewportButtonContainerStatusVisibility() {
-    if (nodeContainerStatusVisibility) {
-        nodeContainerStatusVisibility = false;
-        console.info(
-            "nodeContainerStatusVisibility: " + nodeContainerStatusVisibility,
-        );
-        appendMessage(
-            "nodeContainerStatusVisibility: " + nodeContainerStatusVisibility,
-        );
-        bulmaToast.toast({
-            message: `Alright, mission control, we're standing down. 🛑🔍 Container status probing aborted. Stay chill, folks. 😎👨‍💻`,
-            type: "is-warning is-size-6 p-3",
-            duration: 4000,
-            position: "top-center",
-            closeOnClick: true,
-        });
-    } else {
-        nodeContainerStatusVisibility = true;
-        console.info(
-            "nodeContainerStatusVisibility: " + nodeContainerStatusVisibility,
-        );
-        appendMessage(
-            "nodeContainerStatusVisibility: " + nodeContainerStatusVisibility,
-        );
-        bulmaToast.toast({
-            message: `🕵️‍♂️ Bro, we're currently on a mission to probe that container status! Stay tuned for the results. 🔍🚀👨‍💻`,
-            type: "is-warning is-size-6 p-3",
-            duration: 4000,
-            position: "top-center",
-            closeOnClick: true,
-        });
-    }
-}
-
 
 
 function viewportDrawerLayoutForceDirected() {
@@ -3428,15 +3312,6 @@ function viewportButtonsClabEditor() {
     console.log("viewportDrawerClabEditorContent02", viewportDrawerClabEditorContent02)
 
 
-}
-
-function viewportButtonsGeoMapPan() {
-    console.log("viewportButtonsGeoMapEdit clicked..")
-    console.log("cytoscapeLeafletMap", cytoscapeLeafletMap)
-
-    cytoscapeLeafletLeaf.cy.container().style.pointerEvents = 'none';
-    cytoscapeLeafletLeaf.setZoomControlOpacity("");
-    cytoscapeLeafletLeaf.map.dragging.enable();
 }
 
 function viewportButtonsGeoMapEdit() {
@@ -4303,20 +4178,6 @@ function loadCytoStyle(cy) {
             parent.style('background-color', "rgba(40, 40, 40, 0.5)");
             parent.style('border-color', "rgba(76, 82, 97, 1)");
         });
-    }
-}
-
-function viewportButtonsMultiLayerViewPortToggle() {
-    if (multiLayerViewPortState == false) {
-        multiLayerViewPortState = true; // toggle
-        console.log("multiLayerViewPortState toggle to true", multiLayerViewPortState);
-
-        loadCytoStyle(cy)
-    } else {
-        multiLayerViewPortState = false; // toggle
-        console.log("multiLayerViewPortState toggle to false", multiLayerViewPortState);
-
-        loadCytoStyle(cy)
     }
 }
 
