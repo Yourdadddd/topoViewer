@@ -342,23 +342,27 @@ body {
   z-index: 991;
 }
 
-/* Compact, left-aligned node-properties panel + draggable header. */
+/* Left-aligned node-properties panel + draggable header. */
+#panel-node {
+  min-width: 250px;
+  max-width: 330px;
+}
 #panel-node-header {
   cursor: move;
-  padding: 0.4em 0.75em;
+  padding: 0.6em 1em;
   user-select: none;
 }
 #panel-node .tv-node-body {
-  padding: 0.5em 0.75em 0.6em;
+  padding: 0.8em 1em 0.9em;
 }
 #panel-node .tv-row {
   display: flex;
-  gap: 0.5em;
+  gap: 0.9em;
   align-items: baseline;
-  padding: 1px 0;
+  padding: 0.25em 0;
 }
 #panel-node .tv-label {
-  flex: 0 0 52px;
+  flex: 0 0 58px;
   margin: 0;
   text-align: left;
   opacity: 0.6;
@@ -370,9 +374,10 @@ body {
   margin: 0;
   text-align: left;
   word-break: break-all;
+  line-height: 1.35;
 }
 #panel-node .tv-term-btn {
-  margin-top: 0.6em;
+  margin-top: 0.8em;
 }
 
 #panel-node-editor {

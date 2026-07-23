@@ -71,6 +71,13 @@
 		var nodeKind = urlParam('Kind') || 'default';
 		var nodeImage = decodeURIComponent(urlParam('Image') || '');
 
+		// SSH to the mgmt IP (RouterID) when we have one — the container-name
+		// route depends on a /etc/hosts entry that may be missing — and fall
+		// back to the name otherwise. docker-exec kinds always need the name.
+		var routerIp = urlParam('RouterID').split("?")[0];
+		if (routerIp === 'undefined' || routerIp === 'null') routerIp = '';
+		var sshHost = routerIp || routerName;
+
 		// Build command based on node kind
 		// Reference: https://containerlab.dev/manual/kinds/
 		var terminalCommand;
@@ -82,28 +89,28 @@
 			terminalCommand = "docker exec -it " + routerName + " bash";
 		} else if (nodeKind === 'cisco_iol') {
 			// Cisco IOL: admin/admin
-			terminalCommand = "sshpass -p 'admin' ssh -q -o StrictHostKeyChecking=no admin@" + routerName;
+			terminalCommand = "sshpass -p 'admin' ssh -q -o StrictHostKeyChecking=no admin@" + sshHost;
 		} else if (nodeKind === 'arista_ceos') {
 			// Arista cEOS: admin/admin
-			terminalCommand = "sshpass -p 'admin' ssh -q -o StrictHostKeyChecking=no admin@" + routerName;
+			terminalCommand = "sshpass -p 'admin' ssh -q -o StrictHostKeyChecking=no admin@" + sshHost;
 		} else if (nodeKind === 'juniper_crpd') {
 			// Juniper cRPD: root/clab123
-			terminalCommand = "sshpass -p 'clab123' ssh -q -o StrictHostKeyChecking=no root@" + routerName;
+			terminalCommand = "sshpass -p 'clab123' ssh -q -o StrictHostKeyChecking=no root@" + sshHost;
 		} else if (nodeKind === 'paloalto_panos') {
 			// Palo Alto PAN: admin/Admin@123
-			terminalCommand = "sshpass -p 'Admin@123' ssh -q -o StrictHostKeyChecking=no admin@" + routerName;
+			terminalCommand = "sshpass -p 'Admin@123' ssh -q -o StrictHostKeyChecking=no admin@" + sshHost;
 		} else if (nodeKind === 'nokia_srlinux') {
 			// Nokia SR Linux: admin/NokiaSrl1!
-			terminalCommand = "sshpass -p 'NokiaSrl1!' ssh -q -o StrictHostKeyChecking=no admin@" + routerName;
+			terminalCommand = "sshpass -p 'NokiaSrl1!' ssh -q -o StrictHostKeyChecking=no admin@" + sshHost;
 		} else if (nodeKind === 'vyosnetworks_vyos') {
 			// VyOS: admin/admin
-			terminalCommand = "sshpass -p 'admin' ssh -q -o StrictHostKeyChecking=no admin@" + routerName;
+			terminalCommand = "sshpass -p 'admin' ssh -q -o StrictHostKeyChecking=no admin@" + sshHost;
 		} else if (nodeKind === 'fortinet_fortigate') {
 			// Fortinet FortiGate: admin/Fortinet!1234 (FortiOS 7.6.5+ policy-compliant)
-			terminalCommand = "sshpass -p 'Fortinet!1234' ssh -q -o StrictHostKeyChecking=no admin@" + routerName;
+			terminalCommand = "sshpass -p 'Fortinet!1234' ssh -q -o StrictHostKeyChecking=no admin@" + sshHost;
 		} else {
 			// Other network devices: use SSH with admin user (default fallback, no auto-password)
-			terminalCommand = "ssh -q -o StrictHostKeyChecking=no admin@" + routerName;
+			terminalCommand = "ssh -q -o StrictHostKeyChecking=no admin@" + sshHost;
 		}
 		console.log("Terminal command: " + terminalCommand + " (kind: " + nodeKind + ", image: " + nodeImage + ")");
 		ws.send(terminalCommand + "\n");

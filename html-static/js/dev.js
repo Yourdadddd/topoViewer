@@ -11,7 +11,7 @@ var globalSelectedEdge
 var linkEndpointVisibility = true;
 var nodeContainerStatusVisibility = false;
 
-var globalShellUrl = "/js/cloudshell/index.html?v=20260605f"
+var globalShellUrl = "/js/cloudshell/index.html?v=20260723"
 
 var labName
 
@@ -319,9 +319,13 @@ document.addEventListener("DOMContentLoaded", async function () {
                     // management network (FRR/linux endpoints, host-networked
                     // nodes), so reaching .clab.IPAddress unguarded threw on
                     // every status tick and spammed the console.
-                    const _clabNet = JSON.parse(msgContainerNodeStatus.data)?.Networks?.Networks?.clab;
-                    const IPAddress = _clabNet?.IPAddress;
-                    const GlobalIPv6Address = _clabNet?.GlobalIPv6Address;
+                    // The mgmt docker network is named per-lab (NetPilot
+                    // sets mgmt.network to the lab name), so never hardcode
+                    // "clab" — take the first attached network.
+                    const _nets = JSON.parse(msgContainerNodeStatus.data)?.Networks?.Networks;
+                    const _mgmtNet = _nets && Object.values(_nets)[0];
+                    const IPAddress = _mgmtNet?.IPAddress;
+                    const GlobalIPv6Address = _mgmtNet?.GlobalIPv6Address;
 
 
                     setNodeDataWithContainerAttribute(Names, Status, State, IPAddress, GlobalIPv6Address);
@@ -989,7 +993,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 // document.getElementById("panel-node-status").textContent = node.data("containerDockerExtraAttribute").status;
                 document.getElementById("panel-node-kind").textContent = node.data("extraData").kind;
                 document.getElementById("panel-node-image").textContent = node.data("extraData").image;
-                document.getElementById("panel-node-mgmtipv4").textContent = node.data("extraData").mgmtIpv4Addresss;
+                document.getElementById("panel-node-mgmtipv4").textContent = node.data("extraData").mgmtIpv4Addresss || "";
 
                 // Set selected node-long-name to global variable
                 globalSelectedNode = node.data("extraData").longname;
@@ -1011,8 +1015,8 @@ document.addEventListener("DOMContentLoaded", async function () {
                 // document.getElementById("data-display-panel-node-status").textContent = node.data("containerDockerExtraAttribute").status;
                 document.getElementById("data-display-panel-node-kind").textContent = node.data("extraData").kind;
                 document.getElementById("data-display-panel-node-image").textContent = node.data("extraData").image;
-                document.getElementById("data-display-panel-node-mgmtipv4").textContent = node.data("extraData").mgmtIpv4Addresss;
-                document.getElementById("data-display-panel-node-mgmtipv6").textContent = node.data("extraData").mgmtIpv6Address;
+                document.getElementById("data-display-panel-node-mgmtipv4").textContent = node.data("extraData").mgmtIpv4Addresss || "";
+                document.getElementById("data-display-panel-node-mgmtipv6").textContent = node.data("extraData").mgmtIpv6Address || "";
                 document.getElementById("data-display-panel-node-fqdn").textContent = node.data("extraData").fqdn;
                 document.getElementById("data-display-panel-node-group").textContent = node.data("extraData").group;
                 document.getElementById("data-display-panel-node-topoviewerrole").textContent = node.data("topoViewerRole");
@@ -1881,8 +1885,20 @@ document.addEventListener("DOMContentLoaded", async function () {
                     "containerDockerExtraAttribute",
                     containerDockerExtraAttributeData,
                 );
-                node.data("extraData").mgmtIpv4Addresss = IPAddress;
-                node.data("extraData").mgmtIpv6Address = GlobalIPv6Address;
+                // Only overwrite with real values — a tick without network
+                // data must not blank an IP we already learned.
+                if (IPAddress) {
+                    node.data("extraData").mgmtIpv4Addresss = IPAddress;
+                    // Live-refresh an open Node Properties panel: the node may
+                    // have been clicked before the first status tick arrived.
+                    if (globalSelectedNode === node.data("extraData").longname) {
+                        const mgmtIpEl = document.getElementById("panel-node-mgmtipv4");
+                        if (mgmtIpEl) mgmtIpEl.textContent = IPAddress;
+                    }
+                }
+                if (GlobalIPv6Address) {
+                    node.data("extraData").mgmtIpv6Address = GlobalIPv6Address;
+                }
 
             }
         });
