@@ -108,6 +108,9 @@
 		} else if (nodeKind === 'fortinet_fortigate') {
 			// Fortinet FortiGate: admin/Fortinet!1234 (FortiOS 7.6.5+ policy-compliant)
 			terminalCommand = "sshpass -p 'Fortinet!1234' ssh -q -o StrictHostKeyChecking=no admin@" + sshHost;
+		} else if (nodeKind === 'cisco_xrd') {
+			// Cisco XRd: clab/clab@123 (containerlab-injected)
+			terminalCommand = "sshpass -p 'clab@123' ssh -q -o StrictHostKeyChecking=no clab@" + sshHost;
 		} else {
 			// Other network devices: use SSH with admin user (default fallback, no auto-password)
 			terminalCommand = "ssh -q -o StrictHostKeyChecking=no admin@" + sshHost;
