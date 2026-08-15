@@ -111,6 +111,9 @@
 		} else if (nodeKind === 'cisco_xrd') {
 			// Cisco XRd: clab/clab@123 (containerlab-injected)
 			terminalCommand = "sshpass -p 'clab@123' ssh -q -o StrictHostKeyChecking=no clab@" + sshHost;
+		} else if (nodeKind === 'cisco_n9kv') {
+			// Cisco Nexus 9000v: admin/admin (containerlab-injected, vrnetlab-created)
+			terminalCommand = "sshpass -p 'admin' ssh -q -o StrictHostKeyChecking=no admin@" + sshHost;
 		} else {
 			// Other network devices: use SSH with admin user (default fallback, no auto-password)
 			terminalCommand = "ssh -q -o StrictHostKeyChecking=no admin@" + sshHost;
