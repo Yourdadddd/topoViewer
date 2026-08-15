@@ -89,34 +89,34 @@
 			terminalCommand = "docker exec -it " + routerName + " bash";
 		} else if (nodeKind === 'cisco_iol') {
 			// Cisco IOL: admin/admin
-			terminalCommand = "sshpass -p 'admin' ssh -q -o StrictHostKeyChecking=no admin@" + sshHost;
+			terminalCommand = "sshpass -p 'admin' ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no admin@" + sshHost;
 		} else if (nodeKind === 'arista_ceos') {
 			// Arista cEOS: admin/admin
-			terminalCommand = "sshpass -p 'admin' ssh -q -o StrictHostKeyChecking=no admin@" + sshHost;
+			terminalCommand = "sshpass -p 'admin' ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no admin@" + sshHost;
 		} else if (nodeKind === 'juniper_crpd') {
 			// Juniper cRPD: root/clab123
-			terminalCommand = "sshpass -p 'clab123' ssh -q -o StrictHostKeyChecking=no root@" + sshHost;
+			terminalCommand = "sshpass -p 'clab123' ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@" + sshHost;
 		} else if (nodeKind === 'paloalto_panos') {
 			// Palo Alto PAN: admin/Admin@123
-			terminalCommand = "sshpass -p 'Admin@123' ssh -q -o StrictHostKeyChecking=no admin@" + sshHost;
+			terminalCommand = "sshpass -p 'Admin@123' ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no admin@" + sshHost;
 		} else if (nodeKind === 'nokia_srlinux') {
 			// Nokia SR Linux: admin/NokiaSrl1!
-			terminalCommand = "sshpass -p 'NokiaSrl1!' ssh -q -o StrictHostKeyChecking=no admin@" + sshHost;
+			terminalCommand = "sshpass -p 'NokiaSrl1!' ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no admin@" + sshHost;
 		} else if (nodeKind === 'vyosnetworks_vyos') {
 			// VyOS: admin/admin
-			terminalCommand = "sshpass -p 'admin' ssh -q -o StrictHostKeyChecking=no admin@" + sshHost;
+			terminalCommand = "sshpass -p 'admin' ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no admin@" + sshHost;
 		} else if (nodeKind === 'fortinet_fortigate') {
 			// Fortinet FortiGate: admin/Fortinet!1234 (FortiOS 7.6.5+ policy-compliant)
-			terminalCommand = "sshpass -p 'Fortinet!1234' ssh -q -o StrictHostKeyChecking=no admin@" + sshHost;
+			terminalCommand = "sshpass -p 'Fortinet!1234' ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no admin@" + sshHost;
 		} else if (nodeKind === 'cisco_xrd') {
 			// Cisco XRd: clab/clab@123 (containerlab-injected)
-			terminalCommand = "sshpass -p 'clab@123' ssh -q -o StrictHostKeyChecking=no clab@" + sshHost;
+			terminalCommand = "sshpass -p 'clab@123' ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no clab@" + sshHost;
 		} else if (nodeKind === 'cisco_n9kv') {
 			// Cisco Nexus 9000v: admin/admin (containerlab-injected, vrnetlab-created)
-			terminalCommand = "sshpass -p 'admin' ssh -q -o StrictHostKeyChecking=no admin@" + sshHost;
+			terminalCommand = "sshpass -p 'admin' ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no admin@" + sshHost;
 		} else {
 			// Other network devices: use SSH with admin user (default fallback, no auto-password)
-			terminalCommand = "ssh -q -o StrictHostKeyChecking=no admin@" + sshHost;
+			terminalCommand = "ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no admin@" + sshHost;
 		}
 		console.log("Terminal command: " + terminalCommand + " (kind: " + nodeKind + ", image: " + nodeImage + ")");
 		ws.send(terminalCommand + "\n");
