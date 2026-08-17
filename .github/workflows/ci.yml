@@ -1,0 +1,47 @@
+# PR gates for the NetPilot fork (netpilot-labs/TopoViewer#9). The docker-ci-*
+# workflows are dispatch-only release builds; this is the per-PR correctness
+# gate. Scope is deliberately conservative on the legacy codebase: gofmt/vet
+# are enforced because the tree is currently clean; JS gets a syntax-only check
+# (no lint framework) so the gate stays noise-free and the fork stays easy to
+# merge with upstream.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [development, main]
+
+jobs:
+  go:
+    name: Go (gofmt, build, vet, test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: gofmt (tree must stay clean)
+        run: |
+          DIRTY=$(gofmt -l go_cloudshellwrapper go_topoengine go_xtermjs go_tools)
+          if [ -n "$DIRTY" ]; then
+            echo "gofmt needed on:" && echo "$DIRTY" && exit 1
+          fi
+      - name: build
+        run: go build ./...
+      - name: vet
+        run: go vet ./...
+      - name: test
+        run: go test ./...
+
+  js:
+    name: JS syntax (non-vendored)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: node --check our JS files
+        run: |
+          set -e
+          for f in html-static/js/*.js html-static/js/cloudshell/terminal.js; do
+            echo "checking $f"
+            node --check "$f"
+          done
