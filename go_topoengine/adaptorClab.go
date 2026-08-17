@@ -164,7 +164,8 @@ func (cyTopo *CytoTopology) GenerateClabTopoFromYaml(clabYamlTopoFile string) (s
 	clabJsonTopoFilePath := path.Join(labDir, "topology-data.json")
 	topoDataF, _ := os.Create(clabJsonTopoFilePath)
 
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	c.GenerateExports(ctx, topoDataF, "./html-template/clab/clab-cytoscape-export.tmpl")
 
 	log.Infof("clab json topology succesfully generated, location of the file is %s", clabJsonTopoFilePath)
@@ -190,7 +191,7 @@ func (cyTopo *CytoTopology) ClabTopoJsonRead(topoFile string) []byte {
 	return topoFileBytes
 }
 
-func (cyTopo *CytoTopology) UnmarshalContainerLabTopoV2(topoFile []byte, clabHostUsername string, nodeEndpointDetailSourceTarget []byte) []byte {
+func (cyTopo *CytoTopology) UnmarshalContainerLabTopoV2(topoFile []byte, clabHostUsername string, nodeEndpointDetailSourceTarget []byte) ([]byte, error) {
 
 	// initiate cytoJson struct
 	cytoJson := CytoJson{}
@@ -200,8 +201,13 @@ func (cyTopo *CytoTopology) UnmarshalContainerLabTopoV2(topoFile []byte, clabHos
 
 	var topoviewerParentList []string
 
-	// unmarshal topoFile into clabTopoStruct
-	json.Unmarshal(topoFile, &cyTopo.ClabTopoDataV2)
+	// unmarshal topoFile into clabTopoStruct — a type-invalid document can
+	// partially populate the struct, so the error must reach the caller rather
+	// than a half-built topology being served as if the parse succeeded
+	if err := json.Unmarshal(topoFile, &cyTopo.ClabTopoDataV2); err != nil {
+		log.Errorf("UnmarshalContainerLabTopoV2: failed to unmarshal topology data: %v", err)
+		return nil, err
+	}
 
 	// // get Clab ServerHost Username
 	// user, err := user.Current()
@@ -468,7 +474,7 @@ func (cyTopo *CytoTopology) UnmarshalContainerLabTopoV2(topoFile []byte, clabHos
 	// }
 	log.Debug("jsonBytesCytoUi Result:", string(jsonBytesCytoUi))
 
-	return jsonBytesCytoUi
+	return jsonBytesCytoUi, nil
 }
 
 func (cyTopo *CytoTopology) PrintjsonBytesCytoUiV2(JsonBytesCytoUiMarshaled []byte) error {
