@@ -239,13 +239,27 @@ func reloadTopoFile() error {
 		return errors.New("no topology file configured (neither YAML nor JSON)")
 	}
 
-	freshJsonBytes := fresh.UnmarshalContainerLabTopoV2(topoFile, clabHostUsername, initNodeEndpointDetailSourceTarget)
-	// UnmarshalContainerLabTopoV2 swallows json.Unmarshal errors and returns an
-	// empty payload on malformed input — a valid containerlab topology always
-	// has a name and at least one node, so treat their absence as a failed
-	// parse rather than swapping an empty topology into the live state.
+	freshJsonBytes, errUnmarshal := fresh.UnmarshalContainerLabTopoV2(topoFile, clabHostUsername, initNodeEndpointDetailSourceTarget)
+	if errUnmarshal != nil {
+		return fmt.Errorf("failed to parse topology data: %w", errUnmarshal)
+	}
+	// A syntactically valid but empty document ({}) unmarshals without error —
+	// a real containerlab topology always has a name and at least one node, so
+	// treat their absence as a failed parse rather than swapping in an empty
+	// topology.
 	if fresh.ClabTopoDataV2.Name == "" || len(fresh.ClabTopoDataV2.Nodes) == 0 {
 		return errors.New("reload parsed an empty topology; keeping the previous one")
+	}
+	// Lab-scoped assets (the html-public tree, ws/ and node-backup/ dirs, the
+	// addon yaml, the file-server root) are created once in Clab() for the
+	// startup lab name; serving a different name from this process would point
+	// every lab-scoped handler at missing paths. A renamed lab needs a viewer
+	// restart, not a reload.
+	topoStateMu.RLock()
+	currentName := cyTopo.ClabTopoDataV2.Name
+	topoStateMu.RUnlock()
+	if currentName != "" && fresh.ClabTopoDataV2.Name != currentName {
+		return fmt.Errorf("reload changed lab name from %q to %q; restart topoviewer to serve a different lab", currentName, fresh.ClabTopoDataV2.Name)
 	}
 	fresh.PrintjsonBytesCytoUiV2(freshJsonBytes)
 
@@ -394,7 +408,14 @@ func Clab(_ *cobra.Command, _ []string) error {
 		return errors.New("no valid topology file supplied")
 	}
 
-	cyTopoJsonBytes = cyTopo.UnmarshalContainerLabTopoV2(topoFile, clabHostUsername, initNodeEndpointDetailSourceTarget)
+	var errUnmarshal error
+	// plain assignment, not := — cyTopoJsonBytes is the package-level state the
+	// handler closures read; a short-variable declaration here would shadow it
+	cyTopoJsonBytes, errUnmarshal = cyTopo.UnmarshalContainerLabTopoV2(topoFile, clabHostUsername, initNodeEndpointDetailSourceTarget)
+	if errUnmarshal != nil {
+		log.Errorf("failed to parse topology data: %v", errUnmarshal)
+		return errUnmarshal
+	}
 	// printing dataCytoMarshall-{{clab-node-name}}.json
 	cyTopo.PrintjsonBytesCytoUiV2(cyTopoJsonBytes)
 
