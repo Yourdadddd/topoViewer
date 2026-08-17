@@ -32,6 +32,29 @@
 	// Open the terminal in the specified HTML element
 	terminal.open(document.getElementById("terminal"));
 
+	// Tell the embedding application (when running inside an iframe) that the
+	// user is actively working in this console. Throttled to at most one
+	// message per 30 seconds; standalone TopoViewer sends nothing.
+	// targetOrigin "*" is acceptable: the message carries no data, and the
+	// embedding application is expected to validate event.origin on its side.
+	var ACTIVITY_THROTTLE_MS = 30000;
+	var lastActivitySentAt = 0;
+	var notifyActivity = function() {
+		if (window.parent === window) {
+			return;
+		}
+		var now = Date.now();
+		if (now - lastActivitySentAt < ACTIVITY_THROTTLE_MS) {
+			return;
+		}
+		lastActivitySentAt = now;
+		window.parent.postMessage({ type: "netpilot:console-activity" }, "*");
+	};
+
+	// onData fires on user input only (keystrokes/paste) — never on server
+	// output — so an idle open terminal emits nothing.
+	terminal.onData(notifyActivity);
+
 	// Determine the WebSocket protocol based on the page's protocol
 	var protocol = (location.protocol === "https:") ? "wss://" : "ws://";
 	var url = protocol + location.host + "/xterm.js";
