@@ -176,11 +176,13 @@ var connections = make(map[*websocket.Conn]bool)
 var connectionsMu sync.Mutex
 
 // Topology state served by the HTTP handlers: populated by Clab() at startup,
-// atomically re-populated by reloadTopoFile() on /reload-topo. Handlers must
-// read it under topoStateMu.RLock — reading the startup snapshot instead means
-// nodes added by a later redeploy are invisible to every endpoint (dead
-// Terminal button). Long-lived websocket loops must snapshot per iteration,
-// never hold the read lock across the connection.
+// atomically re-populated by reloadTopoFile() on /reload-topo — without the
+// swap, nodes added by a later redeploy are invisible to every endpoint (dead
+// Terminal button). Readers take a shallow snapshot under topoStateMu.RLock and
+// release BEFORE doing any work: reload replaces the struct wholesale (never
+// mutates in place), so a copy is a consistent view, and holding the read lock
+// across SSH/SNMP/websocket work would let one hung session block the writer
+// and, via writer preference, every other reader.
 var (
 	topoStateMu     sync.RWMutex
 	cyTopo          topoengine.CytoTopology
@@ -238,6 +240,13 @@ func reloadTopoFile() error {
 	}
 
 	freshJsonBytes := fresh.UnmarshalContainerLabTopoV2(topoFile, clabHostUsername, initNodeEndpointDetailSourceTarget)
+	// UnmarshalContainerLabTopoV2 swallows json.Unmarshal errors and returns an
+	// empty payload on malformed input — a valid containerlab topology always
+	// has a name and at least one node, so treat their absence as a failed
+	// parse rather than swapping an empty topology into the live state.
+	if fresh.ClabTopoDataV2.Name == "" || len(fresh.ClabTopoDataV2.Nodes) == 0 {
+		return errors.New("reload parsed an empty topology; keeping the previous one")
+	}
 	fresh.PrintjsonBytesCytoUiV2(freshJsonBytes)
 
 	// Swap only after a fully successful parse: a failed reload must leave the
@@ -701,8 +710,6 @@ func Clab(_ *cobra.Command, _ []string) error {
 	// // API endpoint to get container namespace
 	// router.HandleFunc("/clab/{container_id}/network-namespace",
 	// 	func(w http.ResponseWriter, r *http.Request) {
-		topoStateMu.RLock()
-		defer topoStateMu.RUnlock()
 	// 		vars := mux.Vars(r)
 	// 		containerID := vars["container_id"]
 	// 		clabHandlers.GetDockerNetworkNamespaceIDViaUnixSocket(w, r, &cyTopo, containerID)
@@ -711,43 +718,49 @@ func Clab(_ *cobra.Command, _ []string) error {
 	// API endpoint to get container namespace
 	router.HandleFunc("/clab-node-network-namespace", func(w http.ResponseWriter, r *http.Request) {
 		topoStateMu.RLock()
-		defer topoStateMu.RUnlock()
-		clabHandlers.GetDockerNetworkNamespaceIDViaUnixSocket(w, r, &cyTopo, deploymentType, confClab.GetString("clab-user"), confClab.GetString("clab-pass"), confClab.GetStringSlice("allowed-hostnames")[0], clabServerAddress)
+		topoSnapshot := cyTopo
+		topoStateMu.RUnlock()
+		clabHandlers.GetDockerNetworkNamespaceIDViaUnixSocket(w, r, &topoSnapshot, deploymentType, confClab.GetString("clab-user"), confClab.GetString("clab-pass"), confClab.GetStringSlice("allowed-hostnames")[0], clabServerAddress)
 	}).Methods("GET")
 
 	// API endpoint to set clab-link-impairment
 	router.HandleFunc("/clab-link-impairment", func(w http.ResponseWriter, r *http.Request) {
 		topoStateMu.RLock()
-		defer topoStateMu.RUnlock()
-		clabHandlers.ClabEdgeSetImpairment(w, r, &cyTopo, confClab.GetString("clab-user"), confClab.GetString("clab-pass"), confClab.GetStringSlice("allowed-hostnames")[0], clabServerAddress)
+		topoSnapshot := cyTopo
+		topoStateMu.RUnlock()
+		clabHandlers.ClabEdgeSetImpairment(w, r, &topoSnapshot, confClab.GetString("clab-user"), confClab.GetString("clab-pass"), confClab.GetStringSlice("allowed-hostnames")[0], clabServerAddress)
 	}).Methods("POST")
 
 	// API endpoint to get clab-link-impairment value
 	router.HandleFunc("/clab-link-impairment", func(w http.ResponseWriter, r *http.Request) {
 		topoStateMu.RLock()
-		defer topoStateMu.RUnlock()
-		clabHandlers.ClabEdgeGetImpairment(w, r, &cyTopo, confClab.GetString("clab-user"), confClab.GetString("clab-pass"), confClab.GetStringSlice("allowed-hostnames")[0], clabServerAddress)
+		topoSnapshot := cyTopo
+		topoStateMu.RUnlock()
+		clabHandlers.ClabEdgeGetImpairment(w, r, &topoSnapshot, confClab.GetString("clab-user"), confClab.GetString("clab-pass"), confClab.GetStringSlice("allowed-hostnames")[0], clabServerAddress)
 	}).Methods("GET")
 
 	// API endpoint to get clab-link-macaddress value
 	router.HandleFunc("/clab-link-macaddress", func(w http.ResponseWriter, r *http.Request) {
 		topoStateMu.RLock()
-		defer topoStateMu.RUnlock()
-		clabHandlers.ClabEdgeGetMacAddress(w, r, &cyTopo)
+		topoSnapshot := cyTopo
+		topoStateMu.RUnlock()
+		clabHandlers.ClabEdgeGetMacAddress(w, r, &topoSnapshot)
 	}).Methods("GET")
 
 	// API endpoint to get clab-link-subinterfaces value
 	router.HandleFunc("/clab-link-subinterfaces", func(w http.ResponseWriter, r *http.Request) {
 		topoStateMu.RLock()
-		defer topoStateMu.RUnlock()
-		clabHandlers.GetDockerSubInterfacesViaUnixSocket(w, r, &cyTopo)
+		topoSnapshot := cyTopo
+		topoStateMu.RUnlock()
+		clabHandlers.GetDockerSubInterfacesViaUnixSocket(w, r, &topoSnapshot)
 	}).Methods("GET")
 
 	// API endpoint to get actual-nodes-endpoints label
 	router.HandleFunc("/actual-nodes-endpoints", func(w http.ResponseWriter, r *http.Request) {
 		topoStateMu.RLock()
-		defer topoStateMu.RUnlock()
-		clabHandlers.ClabEdgeGetActualPortViaSnmp(w, r, &cyTopo, workingDirectory)
+		topoSnapshot := cyTopo
+		topoStateMu.RUnlock()
+		clabHandlers.ClabEdgeGetActualPortViaSnmp(w, r, &topoSnapshot, workingDirectory)
 	}).Methods("GET")
 
 	router.HandleFunc("/container-compute-resource-usage", func(w http.ResponseWriter, r *http.Request) {
@@ -757,71 +770,82 @@ func Clab(_ *cobra.Command, _ []string) error {
 	// Separate handler for node-backup-restore files endpoint
 	router.HandleFunc("/files", func(w http.ResponseWriter, r *http.Request) {
 		topoStateMu.RLock()
-		defer topoStateMu.RUnlock()
-		clabHandlers.FilesHandler(w, r, &cyTopo, HtmlPublicPrefixPath, clabHostUsername, clabHostUsername, deploymentType)
+		topoSnapshot := cyTopo
+		topoStateMu.RUnlock()
+		clabHandlers.FilesHandler(w, r, &topoSnapshot, HtmlPublicPrefixPath, clabHostUsername, clabHostUsername, deploymentType)
 	}).Methods("GET")
 
 	// Separate handler for node-backup-restorefile endpoint
 	router.HandleFunc("/file", func(w http.ResponseWriter, r *http.Request) {
 		topoStateMu.RLock()
-		defer topoStateMu.RUnlock()
-		clabHandlers.FileHandler(w, r, &cyTopo, HtmlPublicPrefixPath)
+		topoSnapshot := cyTopo
+		topoStateMu.RUnlock()
+		clabHandlers.FileHandler(w, r, &topoSnapshot, HtmlPublicPrefixPath)
 	}).Methods("GET")
 
 	// // Separate handler for get-environments
 	router.HandleFunc("/get-environments", func(w http.ResponseWriter, r *http.Request) {
 		topoStateMu.RLock()
-		defer topoStateMu.RUnlock()
-		clabHandlers.GetEnvironmentsHandler(w, r, &cyTopo, confClab, cyTopoJsonBytes, VersionInfo, workingDirectory)
+		topoSnapshot := cyTopo
+		jsonBytesSnapshot := cyTopoJsonBytes
+		topoStateMu.RUnlock()
+		clabHandlers.GetEnvironmentsHandler(w, r, &topoSnapshot, confClab, jsonBytesSnapshot, VersionInfo, workingDirectory)
 	}).Methods("GET")
 
 	// Separate handler for python-action
 	router.HandleFunc("/python-action", func(w http.ResponseWriter, r *http.Request) {
 		topoStateMu.RLock()
-		defer topoStateMu.RUnlock()
-		clabHandlers.PythonActionHandler(w, r, &cyTopo, HtmlPublicPrefixPath, confClab)
+		topoSnapshot := cyTopo
+		topoStateMu.RUnlock()
+		clabHandlers.PythonActionHandler(w, r, &topoSnapshot, HtmlPublicPrefixPath, confClab)
 	}).Methods("POST")
 
 	// Separate handler for node-backup-restore
 	router.HandleFunc("/node-backup-restore", func(w http.ResponseWriter, r *http.Request) {
 		topoStateMu.RLock()
-		defer topoStateMu.RUnlock()
-		clabHandlers.ClabNodeBackupRestoreHandler(w, r, &cyTopo)
+		topoSnapshot := cyTopo
+		topoStateMu.RUnlock()
+		clabHandlers.ClabNodeBackupRestoreHandler(w, r, &topoSnapshot)
 	}).Methods("POST")
 
 	// Separate handler for clab-add-node-save-topo-cyto-json
 	router.HandleFunc("/clab-add-node-save-topo-cyto-json", func(w http.ResponseWriter, r *http.Request) {
 		topoStateMu.RLock()
-		defer topoStateMu.RUnlock()
-		clabHandlers.ClabAddNodeSaveTopoCytoJsonHandler(w, r, &cyTopo, workingDirectory)
+		topoSnapshot := cyTopo
+		topoStateMu.RUnlock()
+		clabHandlers.ClabAddNodeSaveTopoCytoJsonHandler(w, r, &topoSnapshot, workingDirectory)
 	}).Methods("POST")
 
 	// Separate handler for clab-del-node-save-topo-cyto-json
 	router.HandleFunc("/clab-del-node-save-topo-cyto-json", func(w http.ResponseWriter, r *http.Request) {
 		topoStateMu.RLock()
-		defer topoStateMu.RUnlock()
-		clabHandlers.ClabDelNodeSaveTopoCytoJsonHandler(w, r, &cyTopo, workingDirectory)
+		topoSnapshot := cyTopo
+		topoStateMu.RUnlock()
+		clabHandlers.ClabDelNodeSaveTopoCytoJsonHandler(w, r, &topoSnapshot, workingDirectory)
 	}).Methods("POST")
 
 	// Separate handler for clab-del-edge-save-topo-cyto-json
 	router.HandleFunc("/clab-del-edge-save-topo-cyto-json", func(w http.ResponseWriter, r *http.Request) {
 		topoStateMu.RLock()
-		defer topoStateMu.RUnlock()
-		clabHandlers.ClabDelEdgeSaveTopoCytoJsonHandler(w, r, &cyTopo, workingDirectory)
+		topoSnapshot := cyTopo
+		topoStateMu.RUnlock()
+		clabHandlers.ClabDelEdgeSaveTopoCytoJsonHandler(w, r, &topoSnapshot, workingDirectory)
 	}).Methods("POST")
 
 	// Separate handler for clab-topo-yaml-save
 	router.HandleFunc("/clab-topo-yaml-save", func(w http.ResponseWriter, r *http.Request) {
 		topoStateMu.RLock()
-		defer topoStateMu.RUnlock()
-		clabHandlers.ClabSaveTopoYamlHandler(w, r, &cyTopo, workingDirectory)
+		topoSnapshot := cyTopo
+		topoStateMu.RUnlock()
+		clabHandlers.ClabSaveTopoYamlHandler(w, r, &topoSnapshot, workingDirectory)
 	}).Methods("POST")
 
 	// // Separate handler for clab-topo-yaml-get endpoint
 	router.HandleFunc("/clab-topo-yaml-get", func(w http.ResponseWriter, r *http.Request) {
 		topoStateMu.RLock()
-		defer topoStateMu.RUnlock()
-		clabHandlers.GetYamlTopoContentHandler(w, r, &cyTopo, workingDirectory)
+		topoSnapshot := cyTopo
+		topoStateMu.RUnlock()
+		clabHandlers.GetYamlTopoContentHandler(w, r, &topoSnapshot, workingDirectory)
 	}).Methods("GET")
 
 	// // Separate handler for get-kind-enum endpoint
