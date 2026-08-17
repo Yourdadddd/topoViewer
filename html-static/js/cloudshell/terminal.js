@@ -114,6 +114,9 @@
 		} else if (nodeKind === 'cisco_n9kv') {
 			// Cisco Nexus 9000v: admin/admin (containerlab-injected, vrnetlab-created)
 			terminalCommand = "sshpass -p 'admin' ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no admin@" + sshHost;
+		} else if (nodeKind === 'aruba_aoscx') {
+			// Aruba AOS-CX: admin/admin (containerlab-injected, vrnetlab-created)
+			terminalCommand = "sshpass -p 'admin' ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no admin@" + sshHost;
 		} else {
 			// Other network devices: use SSH with admin user (default fallback, no auto-password)
 			terminalCommand = "ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no admin@" + sshHost;
