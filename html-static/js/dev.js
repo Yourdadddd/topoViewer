@@ -2106,6 +2106,17 @@ async function sshWebBased(event) {
         console.info("sshWebBased - environments: ", environments)
         cytoTopologyJson = environments["EnvCyTopoJsonBytes"]
         routerData = findCytoElementByLongname(cytoTopologyJson, routerName)
+        if (!routerData) {
+            bulmaToast.toast({
+                message: `Node ${routerName} is not in the server topology yet — wait a few seconds and try again.`,
+                type: "is-danger is-size-6 p-3",
+                duration: 5000,
+                position: "top-center",
+                closeOnClick: true,
+            });
+            console.error(`sshWebBased: '${routerName}' missing from /get-environments payload`);
+            return;
+        }
         var nodeKind = routerData["data"]["extraData"]["kind"] || "default"
         var nodeImage = routerData["data"]["extraData"]["image"] || ""
 
@@ -2128,6 +2139,17 @@ async function sshCliCommandCopy(event) {
         cytoTopologyJson = environments["EnvCyTopoJsonBytes"]
         clabServerAddress = environments["clab-server-address"]
         routerData = findCytoElementByLongname(cytoTopologyJson, routerName)
+        if (!routerData) {
+            bulmaToast.toast({
+                message: `Node ${routerName} is not in the server topology yet — wait a few seconds and try again.`,
+                type: "is-danger is-size-6 p-3",
+                duration: 5000,
+                position: "top-center",
+                closeOnClick: true,
+            });
+            console.error(`sshCliCommandCopy: '${routerName}' missing from /get-environments payload`);
+            return;
+        }
         clabUser = routerData["data"]["extraData"]["clabServerUsername"]
 
         sshCopyString = `ssh -t ${clabUser}@${clabServerAddress} "ssh admin@${routerName}"`

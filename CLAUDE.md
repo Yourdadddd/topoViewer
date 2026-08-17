@@ -79,7 +79,7 @@ sed -i "s/dev.js?ver=[0-9a-z]*/dev.js?ver=${VERSION}/g" html-template/clab/*.tmp
 
 **Cache chain:** `dev.html.tmpl` → `dev.js` → `cloudshell/index.html` → `terminal.js`
 
-**Current version:** `20260723` (bump this for next update)
+**Current version:** `20260817` (bump this for next update)
 
 ### Verify service is running
 ```bash
