@@ -11,7 +11,19 @@ var globalSelectedEdge
 var linkEndpointVisibility = true;
 var nodeContainerStatusVisibility = false;
 
-var globalShellUrl = "/js/cloudshell/index.html?v=20260723"
+var globalShellUrl = "/js/cloudshell/index.html?v=20260817a"
+
+// Console pages opened as popups (window.open on globalShellUrl below) post
+// console-activity messages to this page — their opener. Relay them to our
+// own parent so the embedding application still gets the signal when this
+// page runs inside an iframe. Console pages are served from this same
+// origin, so anything cross-origin is ignored.
+window.addEventListener("message", function(event) {
+    if (window.parent === window) return;
+    if (event.origin !== window.location.origin) return;
+    if (!event.data || event.data.type !== "netpilot:console-activity") return;
+    window.parent.postMessage({ type: "netpilot:console-activity" }, "*");
+});
 
 var labName
 

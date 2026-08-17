@@ -32,15 +32,24 @@
 	// Open the terminal in the specified HTML element
 	terminal.open(document.getElementById("terminal"));
 
-	// Tell the embedding application (when running inside an iframe) that the
-	// user is actively working in this console. Throttled to at most one
-	// message per 30 seconds; standalone TopoViewer sends nothing.
+	// Tell the embedding application that the user is actively working in
+	// this console. The console page runs either directly iframed or as a
+	// popup opened from the topology view (window.open in dev.js) — in the
+	// popup case the message goes to the opener page, which relays it to its
+	// own parent when embedded. Throttled to at most one message per 30
+	// seconds; a standalone console (no parent, no opener) sends nothing.
 	// targetOrigin "*" is acceptable: the message carries no data, and the
 	// embedding application is expected to validate event.origin on its side.
 	var ACTIVITY_THROTTLE_MS = 30000;
 	var lastActivitySentAt = 0;
 	var notifyActivity = function() {
-		if (window.parent === window) {
+		var target = null;
+		if (window.parent !== window) {
+			target = window.parent;
+		} else if (window.opener) {
+			target = window.opener;
+		}
+		if (!target) {
 			return;
 		}
 		var now = Date.now();
@@ -48,7 +57,7 @@
 			return;
 		}
 		lastActivitySentAt = now;
-		window.parent.postMessage({ type: "netpilot:console-activity" }, "*");
+		target.postMessage({ type: "netpilot:console-activity" }, "*");
 	};
 
 	// onData fires on user input only (keystrokes/paste) — never on server
